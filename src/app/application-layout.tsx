@@ -22,21 +22,12 @@ import {
 } from '@/components/sidebar'
 import { SidebarLayout } from '@/components/sidebar-layout'
 import { getEvents } from '@/data'
-import {
-  ArrowRightStartOnRectangleIcon,
-  ChevronUpIcon,
-  UserCircleIcon,
-} from '@heroicons/react/16/solid'
-import {
-  Cog6ToothIcon,
-  HomeIcon,
-  QuestionMarkCircleIcon,
-  SparklesIcon,
-} from '@heroicons/react/20/solid'
+import { ArrowRightStartOnRectangleIcon, ChevronUpIcon, UserCircleIcon } from '@heroicons/react/16/solid'
+import { Cog6ToothIcon, HomeIcon, QuestionMarkCircleIcon, SparklesIcon } from '@heroicons/react/20/solid'
 import { usePathname } from 'next/navigation'
 
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export function ApplicationLayout({
   events,
@@ -44,9 +35,8 @@ export function ApplicationLayout({
 }: {
   events: Awaited<ReturnType<typeof getEvents>>
   children: React.ReactNode
-  }) {
-
-   let pathname = usePathname()
+}) {
+  let pathname = usePathname()
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
@@ -91,9 +81,9 @@ export function ApplicationLayout({
         <Sidebar>
           <SidebarHeader>
             <SidebarItem disabled>
-                <Avatar src="/teams/catalyst.svg" />
-                <SidebarLabel>Dashboard</SidebarLabel>
-             </SidebarItem>
+              <Avatar src="/teams/catalyst.svg" />
+              <SidebarLabel>Oberst</SidebarLabel>
+            </SidebarItem>
           </SidebarHeader>
 
           <SidebarBody>
@@ -107,8 +97,6 @@ export function ApplicationLayout({
                 <SidebarLabel>Settings</SidebarLabel>
               </SidebarItem>
             </SidebarSection>
-
-
 
             <SidebarSpacer />
 
@@ -169,7 +157,7 @@ function AccountDropdownMenu({ anchor }: { anchor: 'top start' | 'bottom end' })
       </DropdownItem>
       <DropdownDivider />
       <DropdownDivider />
-      <DropdownItem onClick={handleSignOut} >
+      <DropdownItem onClick={handleSignOut}>
         <ArrowRightStartOnRectangleIcon />
         <DropdownLabel>Sign out</DropdownLabel>
       </DropdownItem>
