@@ -3,11 +3,13 @@ import { Badge } from '@/components/badge'
 import { BadgeComponent } from '@/components/badgeComponent'
 import { Divider } from '@/components/divider'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/table'
-
 import { formatDateString } from '@/utils/helpers'
-
 import { useEffect, useState } from 'react'
 
+import ImageSkeleton from '@/components/cardSkeleton'
+import MultiAxisLineChart from '@/components/chart'
+import PieChart from '@/components/pieChart'
+import TableSkeleton from '@/components/skeletonTable'
 import '../../styles/home.css'
 
 export function Stat({ title, value, change }: { title: string; value: string; change: string }) {
@@ -95,28 +97,41 @@ export function TimelineItem({
 export default function Home() {
   const [actors, setActors] = useState([])
   const [runs, setRuns] = useState([])
+  const [items, setItems] = useState([])
+  const [targets, setTargets] = useState([])
+  const [expires, setExpires] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const [searchActor, setsearchActor] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [csrfToken, setCsrfToken] = useState('')
 
+  const [lastHours, setLastHours] = useState(24)
+
   const getActors = async function () {
     const params = new URLSearchParams()
     if (searchActor) params.append('actor', searchActor) // Add name filter if provided
     if (statusFilter) params.append('status', statusFilter) // Add status filter if provided
+    setLoading(true)
 
-    const response = await fetch(`/api/actors?${params.toString()}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken,
-      },
-    })
-    const json = await response.json()
-    setActors(json?.data?.results)
+    setTimeout(async () => {
+      const response = await fetch(`/api/actors?${params.toString()}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
+      })
+      const json = await response.json()
+      setActors(json?.data?.results)
+      setLoading(false)
+    }, 2000)
   }
 
-  const getRuns = async function () {
-    const response = await fetch(`/api/runs`, {
+  const getRuns = async function ({ params }: { params?: { lastHours: number } } = {}) {
+    const search = new URLSearchParams()
+    search.append('lastHours', params?.lastHours?.toString() || lastHours.toString())
+
+    const response = await fetch(`/api/runs?${search.toString()}`, {
       headers: {
         'Content-Type': 'application/json',
         'X-CSRF-Token': csrfToken,
@@ -127,9 +142,36 @@ export default function Home() {
     setRuns(json.data.results)
   }
 
+  const getItems = async function () {
+    const response = await fetch('/api/charts/items')
+    const json = await response.json()
+    setItems(json.data.results)
+  }
+
+  const getTargets = async () => {
+    const response = await fetch('/api/charts/targets')
+    const json = await response.json()
+    setTargets(json.data.results)
+  }
+
+  const getExpires = async () => {
+    const response = await fetch('/api/charts/expires')
+    const json = await response.json()
+    setExpires(json.data.results)
+  }
+
+  const showRuns = () => {
+    const lastHoursParams = lastHours + 8
+    setLastHours(lastHoursParams)
+    if (lastHours <= 48) getRuns({ params: { lastHours: lastHoursParams } })
+  }
+
   useEffect(() => {
     getActors()
     getRuns()
+    getItems()
+    getTargets()
+    getExpires()
     fetch('/api/auth/csrf')
       .then((res) => res.json())
       .then((data) => setCsrfToken(data.csrfToken))
@@ -194,7 +236,7 @@ export default function Home() {
               </div>
             </div>
             <div style={{ ...styles.leftBox, ...styles.scrollable }}>
-              {actors && (
+              {actors && !loading && (
                 <Table className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]">
                   <TableHead>
                     <TableRow>
@@ -237,41 +279,66 @@ export default function Home() {
                   </TableBody>
                 </Table>
               )}
+              {loading && <TableSkeleton></TableSkeleton>}
             </div>
           </div>
         </div>
         <div style={{ ...styles.box }}>
-          <div>
-            <div className="mb-4">Processed Run</div>
-            <div style={{ ...styles.rightBox, ...styles.scrollable }}>
-              <ol className="relative ml-2 mr-8 mt-2 border-s border-gray-200 dark:border-gray-700">
-                {runs.map((run: any) => (
-                  <TimelineItem
-                    title={run.name}
-                    date={run?._max?.endedAt}
-                    status={run?._max?.status}
-                    data={run?._sum}
-                  ></TimelineItem>
-                ))}
-              </ol>
-              {runs.length == 0 && (
-                <>
-                  <span className="mt-4 text-sm text-zinc-500">No runs for today.</span>
-                </>
-              )}
+          <div className="mb-4">Processed Run</div>
+
+          {!loading && (
+            <div>
+              <div style={{ ...styles.rightBox, ...styles.scrollable }}>
+                <ol className="relative ml-2 mr-8 mt-2 border-s border-gray-200 dark:border-gray-700">
+                  {runs.map((run: any) => (
+                    <TimelineItem
+                      title={run.name}
+                      date={run?._max?.endedAt}
+                      status={run?._max?.status}
+                      data={run?._sum}
+                    ></TimelineItem>
+                  ))}
+                </ol>
+                {runs.length == 0 && (
+                  <>
+                    <span className="mt-4 text-sm text-zinc-500">No runs for today.</span>
+                  </>
+                )}
+              </div>
+
+              <div className="mt-4 flex">
+                <div className="mx-auto items-center self-center">
+                  {lastHours < 48 && (
+                    <button
+                      onClick={showRuns}
+                      type="button"
+                      className="mb-2 me-2 rounded-lg px-8 py-2.5 text-xs font-medium text-gray-300 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                    >
+                      Show more
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+          {loading && <ImageSkeleton></ImageSkeleton>}
         </div>
 
         {/* Right Section (1/3 of the screen) */}
         <div style={{ ...styles.box, ...styles.rightBox }}>
           <div>
-            <div>Letf Row 2</div>
-
-            {/* <MultiAxisLineChart></MultiAxisLineChart> */}
+            <div className="mb-4">Items & Target Pages stats</div>
+            {!loading && <MultiAxisLineChart data={{ ...items, ...targets }}></MultiAxisLineChart>}
+            {loading && <ImageSkeleton></ImageSkeleton>}
           </div>
         </div>
-        <div style={{ ...styles.box, ...styles.rightBox }}>Right Row 2</div>
+        <div style={{ ...styles.box, ...styles.rightBox }}>
+          <div>
+            <div className="mb-6">Items breakdown</div>
+            {!loading && <PieChart dataset={expires}></PieChart>}
+            {loading && <ImageSkeleton></ImageSkeleton>}
+          </div>
+        </div>
       </div>
     </>
   )

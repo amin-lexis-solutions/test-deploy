@@ -1,8 +1,17 @@
 import { PrismaClient } from '@prisma/client'
+import { subHours } from 'date-fns' // Import date-fns for easy time manipulation
 import { NextResponse } from 'next/server'
+
 const prisma = new PrismaClient()
 
 export async function GET(request: any) {
+  const { searchParams } = new URL(request.url)
+
+  const lastHoursParam = parseInt(searchParams.get('lastHours') || '24', 24) // default to 10 items per page
+
+  const now = new Date()
+  const lastHours = subHours(now, lastHoursParam)
+
   const [totalSource, sources] = await Promise.all([
     prisma.source.count(),
     prisma.source.findMany({
@@ -13,16 +22,13 @@ export async function GET(request: any) {
     }),
   ])
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // Set time to 00:00:00
-
   const [total, runs] = await Promise.all([
     prisma.processedRun.count(),
     prisma.processedRun.groupBy({
       by: ['apifyActorId'],
       where: {
         endedAt: {
-          gt: today,
+          gt: lastHours,
         },
       },
       _sum: {
@@ -40,8 +46,8 @@ export async function GET(request: any) {
   ])
 
   // Combine source data with processedRun data
-  const ProcessedRuns = runs.map((run: any) => {
-    const source = sources.filter((source: any) => source.apifyActorId == run.apifyActorId)[0]?.name
+  const ProcessedRuns = runs?.map((run: any) => {
+    const source = sources?.filter((source: any) => source.apifyActorId == run.apifyActorId)[0]?.name
 
     return {
       name: source,
@@ -49,9 +55,9 @@ export async function GET(request: any) {
     }
   })
 
-  const data = ProcessedRuns.sort((a: any, b: any) => {
-    const dateA = new Date(a._max.endedAt).getTime()
-    const dateB = new Date(b._max.endedAt).getTime()
+  const data = ProcessedRuns?.sort((a: any, b: any) => {
+    const dateA = new Date(a?._max?.endedAt)?.getTime()
+    const dateB = new Date(b?._max?.endedAt)?.getTime()
     return dateB - dateA // Sort descending by date
   })
 
