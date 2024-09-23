@@ -237,11 +237,12 @@ export default function Home() {
             </div>
             <div style={{ ...styles.leftBox, ...styles.scrollable }}>
               {actors && !loading && (
-                <Table className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]">
+                <Table dense={true} className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]">
                   <TableHead>
                     <TableRow>
                       <TableHeader>Actor</TableHeader>
                       <TableHeader>Status</TableHeader>
+                      <TableHeader>Date</TableHeader>
                       <TableHeader>Processed Run</TableHeader>
                       <TableHeader>Last Test</TableHeader>
                     </TableRow>
@@ -254,11 +255,10 @@ export default function Home() {
                           <TableCell>
                             <BadgeComponent status={actor?.ProcessedRun[0]?.status}></BadgeComponent>
                           </TableCell>
+                          <TableCell> {formatDateString(actor?.lastRunAt)} </TableCell>
                           <TableCell className="text-zinc-500">
-                            <div className="flex-container">
-                              <div className="row">{formatDateString(actor.lastRunAt)}</div>
-                              <div className="row">Scraped {actor?.ProcessedRun[0]?.resultCount}</div>
-                              <div className="row">Failed {actor?.ProcessedRun[0]?.failedCount}</div>
+                            <div className="inline-block">
+                              Scraped {actor?.ProcessedRun[0]?.resultCount} Failed {actor?.ProcessedRun[0]?.failedCount}
                             </div>
                           </TableCell>
 
