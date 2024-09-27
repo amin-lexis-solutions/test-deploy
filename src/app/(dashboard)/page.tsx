@@ -9,7 +9,9 @@ import { useEffect, useState } from 'react'
 import ImageSkeleton from '@/components/cardSkeleton'
 import MultiAxisLineChart from '@/components/chart'
 import PieChart from '@/components/pieChart'
+import { SkeletonList } from '@/components/skeletonList'
 import TableSkeleton from '@/components/skeletonTable'
+import { StackedList } from '@/components/stackedList'
 import '../../styles/home.css'
 
 export function Stat({ title, value, change }: { title: string; value: string; change: string }) {
@@ -65,27 +67,24 @@ export function TimelineItem({
       <li className="mb-6 ms-4">
         <div className="absolute -start-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-200 dark:border-gray-900 dark:bg-gray-700"></div>
 
-        <div className="items-center justify-between rounded-lg px-2 shadow-sm sm:flex">
+        <div className="flex items-center justify-between rounded-lg px-2 shadow-sm">
           <time className="mb-1 text-xs font-normal text-zinc-500 sm:order-last sm:mb-0">{timeAgo(date)}</time>
           <div className="justify-center text-sm font-bold text-gray-500 dark:text-gray-300">
             <span>
               {title}
               {'  '}
             </span>
-            <span className="ml-10 rounded bg-gray-300 px-2.5 py-1 text-xs font-normal text-gray-800 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <span className="ml-10 rounded bg-gray-300 px-2 py-1 text-xs font-normal text-gray-800 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
               {status}
             </span>
           </div>
         </div>
         <div>
           {data && status == 'SUCCEEDED' && (
-            <div className="mt-4 flex flex-col rounded-lg border border-gray-500 bg-gray-50 px-4 py-2 text-xs font-normal text-gray-500 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-              <span className="row flex-1 font-normal"> Created items {data.createdCount}</span>
-              <span className="row flex-1 font-normal"> Updated items {data.updatedCount}</span>
-              <span className="row flex-1 font-normal">
-                {' '}
-                Archived items {data.archivedCount ? data.archivedCount : 0}
-              </span>
+            <div className="row mt-4 flex justify-start space-x-4 rounded-lg border border-gray-500 bg-gray-50 px-2 py-2 text-xs font-normal text-gray-500 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+              <p>Created {data.createdCount}</p>
+              <p>Updated {data.updatedCount}</p>
+              <p>Archived {data.archivedCount ? data.archivedCount : 0}</p>
             </div>
           )}
         </div>
@@ -94,28 +93,42 @@ export function TimelineItem({
   )
 }
 
+function formatNumberWithDots(num: number) {
+  return num?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
 export default function Home() {
   const [actors, setActors] = useState([])
-  const [runs, setRuns] = useState([])
+  const [runs, setRuns] = useState<any>([])
+
   const [items, setItems] = useState([])
   const [targets, setTargets] = useState([])
   const [expires, setExpires] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [locales, setLocales] = useState([])
+
+  const [loadingActors, setLoadingActors] = useState(true)
+  const [loadingRuns, setLoadingRuns] = useState(true)
+  const [loadingBreakdown, setLoadingBreakdown] = useState(true)
+  const [loadingChart, setLoadingChart] = useState(true)
+  const [loadingLocales, setLoadingLocales] = useState(true)
 
   const [searchActor, setsearchActor] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [csrfToken, setCsrfToken] = useState('')
 
-  const [lastHours, setLastHours] = useState(24)
+  const [runsPagination, setRunsPagination] = useState<any>({})
 
-  const getActors = async function () {
-    const params = new URLSearchParams()
-    if (searchActor) params.append('actor', searchActor) // Add name filter if provided
-    if (statusFilter) params.append('status', statusFilter) // Add status filter if provided
-    setLoading(true)
+  // Async function to retrieve and set actors
+  const getActors = async function ({ params }: { params?: { statusFilter?: string; searchActor?: string } }) {
+    const search: any = new URLSearchParams()
+
+    if (params?.searchActor) search.append('actor', params?.searchActor)
+    if (params?.statusFilter) search.append('status', params?.statusFilter)
+
+    setLoadingActors(true)
 
     setTimeout(async () => {
-      const response = await fetch(`/api/actors?${params.toString()}`, {
+      const response = await fetch(`/api/actors?${search.toString()}`, {
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': csrfToken,
@@ -123,13 +136,14 @@ export default function Home() {
       })
       const json = await response.json()
       setActors(json?.data?.results)
-      setLoading(false)
+      setLoadingActors(false)
     }, 2000)
   }
 
-  const getRuns = async function ({ params }: { params?: { lastHours: number } } = {}) {
+  // Async function to retrieve and set processed runs
+  const getRuns = async function ({ params }: { params?: { previousDay?: string } } = {}) {
     const search = new URLSearchParams()
-    search.append('lastHours', params?.lastHours?.toString() || lastHours.toString())
+    search.append('endDate', params?.previousDay || '')
 
     const response = await fetch(`/api/runs?${search.toString()}`, {
       headers: {
@@ -137,61 +151,112 @@ export default function Home() {
         'X-CSRF-Token': csrfToken,
       },
     })
-
     const json = await response.json()
-    setRuns(json.data.results)
+    return json
   }
 
+  const fetchInitialRuns = async () => {
+    setLoadingRuns(true)
+    setTimeout(async () => {
+      const initialData = await getRuns()
+      setRunsPagination(initialData.data.pagination)
+      setRuns(initialData.data.results)
+      setLoadingRuns(false)
+    }, 1000)
+  }
+
+  // Async function to retrieve and set itemCount
   const getItems = async function () {
     const response = await fetch('/api/charts/items')
     const json = await response.json()
     setItems(json.data.results)
   }
 
+  // Async function to retrieve and set target pages
   const getTargets = async () => {
     const response = await fetch('/api/charts/targets')
     const json = await response.json()
     setTargets(json.data.results)
   }
 
-  const getExpires = async () => {
-    const response = await fetch('/api/charts/expires')
-    const json = await response.json()
-    setExpires(json.data.results)
+  // Async function to retrieve and set items breakdowns
+  const getBreakdown = async () => {
+    setLoadingBreakdown(true)
+    setTimeout(async () => {
+      const response = await fetch('/api/charts/breakdown')
+      const json = await response.json()
+      setExpires(json.data.results)
+      setLoadingBreakdown(false)
+    }, 2000)
   }
 
-  const showRuns = () => {
-    const lastHoursParams = lastHours + 8
-    setLastHours(lastHoursParams)
-    if (lastHours <= 48) getRuns({ params: { lastHours: lastHoursParams } })
+  // function to call runs
+  const showRuns = async () => {
+    const json = await getRuns({ params: { previousDay: runsPagination?.previousDay } })
+    const data = json.data.results
+    setRunsPagination(json.data.pagination)
+    setRuns((prevRuns: any) => [...prevRuns, ...data]) // Append new data to the current state
   }
 
-  useEffect(() => {
-    getActors()
-    getRuns()
-    getItems()
-    getTargets()
-    getExpires()
+  // Async function to retrieve and set locales
+  const getLocales = async () => {
+    setLoadingLocales(true)
+    setTimeout(async () => {
+      const response = await fetch('/api/locales')
+      const json = await response?.json()
+      setLocales(json?.data?.locales)
+      setLoadingLocales(false)
+    }, 2000)
+  }
+
+  const getChartData = async () => {
+    setLoadingChart(true)
+    setTimeout(async () => {
+      await getItems()
+      await getTargets()
+      setLoadingChart(false)
+    }, 2000)
+  }
+
+  const getToken = () => {
     fetch('/api/auth/csrf')
       .then((res) => res.json())
       .then((data) => setCsrfToken(data.csrfToken))
-  }, [searchActor, statusFilter])
+  }
+
+  const handleStatus = async (query: string) => {
+    setStatusFilter(query)
+    await getActors({ params: { statusFilter: query } })
+  }
+
+  const handleSearch = async (query: string) => {
+    setsearchActor(query)
+    await getActors({ params: { searchActor: query } })
+  }
+
+  useEffect(() => {
+    getActors({})
+    fetchInitialRuns()
+    getBreakdown()
+    getLocales()
+    getChartData()
+    getToken()
+  }, [])
 
   return (
     <>
       <div style={styles.container}>
-        {/* Left Section (2/3 of the screen) */}
+        {/* Actors */}
         <div style={{ ...styles.leftBox, ...styles.box }}>
-          {/* <h2>Table 1</h2> */}
           <div>
             <div className="mb-4">
-              <div className="mb-2">Actors</div>
+              <h2 className="mb-2">Actors</h2>
               <div className="grid grid-cols-[auto_1fr] gap-4">
                 <form className="w-full">
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    id="countries"
+                    onChange={(e) => handleStatus(e.target.value)}
+                    id="status"
                     className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                   >
                     <option selected value={''}>
@@ -227,7 +292,7 @@ export default function Home() {
                       type="search"
                       id="default-search"
                       value={searchActor}
-                      onChange={(e) => setsearchActor(e.target.value)}
+                      onChange={(e) => handleSearch(e.target.value)}
                       className="block w-full rounded-lg border border-gray-300 p-2 ps-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                       placeholder="Search Actor by name"
                     />
@@ -236,15 +301,15 @@ export default function Home() {
               </div>
             </div>
             <div style={{ ...styles.leftBox, ...styles.scrollable }}>
-              {actors && !loading && (
+              {actors && !loadingActors && (
                 <Table dense={true} className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]">
                   <TableHead>
                     <TableRow>
-                      <TableHeader>Actor</TableHeader>
+                      <TableHeader>Actors</TableHeader>
                       <TableHeader>Status</TableHeader>
-                      <TableHeader>Date</TableHeader>
-                      <TableHeader>Processed Run</TableHeader>
-                      <TableHeader>Last Test</TableHeader>
+                      <TableHeader>Dates</TableHeader>
+                      <TableHeader>Processed Runs</TableHeader>
+                      <TableHeader>Last Tests</TableHeader>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -253,21 +318,20 @@ export default function Home() {
                         <TableRow key={actor.id} title={`Actor #${actor.id}`}>
                           <TableCell>{actor.name}</TableCell>
                           <TableCell>
-                            <BadgeComponent status={actor?.ProcessedRun[0]?.status}></BadgeComponent>
+                            <BadgeComponent status={actor?.runs.status}></BadgeComponent>
                           </TableCell>
-                          <TableCell> {formatDateString(actor?.lastRunAt)} </TableCell>
-                          <TableCell className="text-zinc-500">
-                            <div className="inline-block">
-                              Scraped {actor?.ProcessedRun[0]?.resultCount} Failed {actor?.ProcessedRun[0]?.failedCount}
+                          <TableCell> {actor?.lastRunAt && formatDateString(actor?.lastRunAt)} </TableCell>
+                          <TableCell>
+                            <div className="inline-block justify-around">
+                              Scraped {formatNumberWithDots(actor?.runs.resultCount) || 0} - Failed{' '}
+                              {formatNumberWithDots(actor?.runs.failedCount) || 0}
                             </div>
                           </TableCell>
 
-                          <TableCell className="text-zinc-500">
-                            {actor.test ? (
-                              formatDateString(actor.test.lastRunAt)
-                            ) : (
-                              <BadgeComponent status={actor?.test?.status}></BadgeComponent>
-                            )}
+                          <TableCell>
+                            {actor?.test && formatDateString(actor?.test?.lastRunAt)}{' '}
+                            {actor?.test && <BadgeComponent status={actor?.test?.status}></BadgeComponent>}
+                            {!actor?.test && <BadgeComponent status={'N/A'}></BadgeComponent>}
                           </TableCell>
                         </TableRow>
                       ))
@@ -279,21 +343,22 @@ export default function Home() {
                   </TableBody>
                 </Table>
               )}
-              {loading && <TableSkeleton></TableSkeleton>}
+              {loadingActors && <TableSkeleton></TableSkeleton>}
             </div>
           </div>
         </div>
+        {/* Processed Runs */}
         <div style={{ ...styles.box }}>
-          <div className="mb-4">Processed Run</div>
+          <h2 className="mb-4">Processed Runs</h2>
 
-          {!loading && (
+          {!loadingRuns && (
             <div>
               <div style={{ ...styles.rightBox, ...styles.scrollable }}>
                 <ol className="relative ml-2 mr-8 mt-2 border-s border-gray-200 dark:border-gray-700">
                   {runs.map((run: any) => (
                     <TimelineItem
                       title={run.name}
-                      date={run?._max?.endedAt}
+                      date={run?._max?.startedAt}
                       status={run?._max?.status}
                       data={run?._sum}
                     ></TimelineItem>
@@ -308,37 +373,52 @@ export default function Home() {
 
               <div className="mt-4 flex">
                 <div className="mx-auto items-center self-center">
-                  {lastHours < 48 && (
-                    <button
-                      onClick={showRuns}
-                      type="button"
-                      className="mb-2 me-2 rounded-lg px-8 py-2.5 text-xs font-medium text-gray-300 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                    >
-                      Show more
-                    </button>
-                  )}
+                  <button
+                    onClick={showRuns}
+                    type="button"
+                    className="mb-2 me-2 rounded-lg px-8 py-2.5 text-xs font-medium text-gray-300 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                  >
+                    Show previous day
+                  </button>
                 </div>
               </div>
             </div>
           )}
-          {loading && <ImageSkeleton></ImageSkeleton>}
+          {loadingRuns && <SkeletonList></SkeletonList>}
         </div>
 
         {/* Right Section (1/3 of the screen) */}
         <div style={{ ...styles.box, ...styles.rightBox }}>
           <div>
-            <div className="mb-4">Items & Target Pages stats</div>
-            {!loading && <MultiAxisLineChart data={{ ...items, ...targets }}></MultiAxisLineChart>}
-            {loading && <ImageSkeleton></ImageSkeleton>}
+            <h2 className="mb-4">Items & Target Pages stats</h2>
+            {loadingChart ? (
+              <ImageSkeleton></ImageSkeleton>
+            ) : (
+              <MultiAxisLineChart data={{ items, targets }}></MultiAxisLineChart>
+            )}
           </div>
         </div>
+        {/* Breakdowns */}
         <div style={{ ...styles.box, ...styles.rightBox }}>
           <div>
             <div className="mb-6">Items breakdown</div>
-            {!loading && <PieChart dataset={expires}></PieChart>}
-            {loading && <ImageSkeleton></ImageSkeleton>}
+            {loadingBreakdown ? <ImageSkeleton></ImageSkeleton> : <PieChart dataset={expires}></PieChart>}
           </div>
         </div>
+      </div>
+      {/* Locales */}
+      <div style={styles.box}>
+        <div className="mb-6">Locales</div>
+
+        {loadingLocales ? (
+          <SkeletonList></SkeletonList>
+        ) : (
+          Object.entries(locales).map(([key, value], index) => (
+            <div key={index}>
+              <StackedList data={[key, value]}></StackedList>
+            </div>
+          ))
+        )}
       </div>
     </>
   )
@@ -370,5 +450,18 @@ const styles = {
   },
   rightBox: {
     gridRow: 'span 1',
+  },
+  '@media (max-width: 768px)': {
+    // For tablets or small screens
+    gridTemplateColumns: '1fr', // Make the grid a single column
+    gridTemplateRows: 'auto', // Adjust the rows to be automatic based on content
+    gap: '20px', // Smaller gap on smaller screens
+  },
+
+  '@media (max-width: 480px)': {
+    // For mobile screens
+    gridTemplateColumns: '1fr', // Single column layout
+    gridTemplateRows: 'auto', // Auto height for rows
+    gap: '15px', // Even smaller gap
   },
 }

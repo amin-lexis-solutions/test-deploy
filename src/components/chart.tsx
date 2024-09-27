@@ -57,20 +57,23 @@ function formatDate(dateString: string): string {
 
 const MultiAxisLineChart = ({ data }: { data: any }) => {
   const schema = {
-    labels: data?.dates?.map((date: string) => formatDate(date)),
+    labels:
+      data?.items?.dates > data?.targets?.dates
+        ? data?.items?.dates?.map((date: string) => formatDate(date))
+        : data?.targets?.dates?.map((date: string) => formatDate(date)),
     datasets: [
       {
         label: 'Items count',
-        data: data.items,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        data: data.items.items,
+        borderColor: 'rgb(41,98,255)',
+        backgroundColor: 'rgb(41,98,255)',
         yAxisID: 'y1',
       },
       {
         label: 'Targets count',
-        data: data.targets,
-        borderColor: 'rgba(255, 99, 132, 1)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        data: data.targets.targets,
+        borderColor: 'rgb(170,0,255)',
+        backgroundColor: 'rgb(170,0,255)',
         yAxisID: 'y2',
       },
     ],

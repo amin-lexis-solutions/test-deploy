@@ -5,12 +5,10 @@ const TableSkeleton = () => {
       <table className="min-w-full">
         <thead>
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actor</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Last Run</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              Last Test
-            </th>
+            <th className="px-6 py-3 text-left text-sm font-medium tracking-wider text-gray-500">Actors</th>
+            <th className="px-6 py-3 text-left text-sm font-medium tracking-wider text-gray-500">Status</th>
+            <th className="px-6 py-3 text-left text-sm font-medium tracking-wider text-gray-500">Last Runs</th>
+            <th className="px-6 py-3 text-left text-sm font-medium tracking-wider text-gray-500">Last Tests</th>
           </tr>
         </thead>
         <tbody>
