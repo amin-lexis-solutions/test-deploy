@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy project files
 COPY . .
@@ -41,7 +41,12 @@ USER nextjs
 EXPOSE 3000
 
 # Set environment variables
-ENV NODE_ENV production
+
+COPY .env .env
+
+EXPOSE $API_URL
+EXPOSE $API_SECRET
+EXPOSE $ADMIN_PASS
 
 # Run the Next.js app
 CMD ["npm", "start"]

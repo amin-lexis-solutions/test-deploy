@@ -9,3 +9,7 @@ export function formatDateString(isoDateString: string) {
   // Format date as dd.MM.yyyy
   return `${day}.${month}.${year}`
 }
+
+export function formatNumberWithDots(num: number) {
+  return num?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}

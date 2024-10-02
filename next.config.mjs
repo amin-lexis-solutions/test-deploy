@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+  env: {
+    API_URL: process.env.API_URL,
+    API_SECRET: process.env.API_SECRET,
+  },
+}
 
 export default nextConfig
