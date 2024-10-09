@@ -6,7 +6,7 @@ export function BadgeComponent({ status }: { status?: string }) {
     'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-red-500 ring-1 ring-inset ring-red-600/10'
 
   const gray =
-    'inline-flex items-center rounded-md px-8 py-1 text-xs font-medium text-gray-300 dark:text-gray-100 ring-1 ring-inset ring-gray-300'
+    'inline-flex items-center rounded-md px-8 py-1 text-xs font-medium text-gray-300 dark:text-gray-500 ring-1 ring-inset ring-gray-500'
 
   const purple =
     'bg-purple-100 text-purple-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300'

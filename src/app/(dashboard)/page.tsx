@@ -30,6 +30,9 @@ export default function Home() {
   const [loadingLocales, setLoadingLocales] = useState(true)
 
   const [searchActor, setsearchActor] = useState('')
+
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
   const [statusFilter, setStatusFilter] = useState('')
   const [csrfToken, setCsrfToken] = useState('')
 
@@ -166,11 +169,6 @@ export default function Home() {
     await getActors({ params: { statusFilter: query } })
   }
 
-  const handleSearch = async (query: string) => {
-    setsearchActor(query)
-    await getActors({ params: { searchActor: query } })
-  }
-
   useEffect(() => {
     getActors({})
     fetchInitialRuns()
@@ -179,6 +177,14 @@ export default function Home() {
     getChartData()
     getToken()
   }, [])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      getActors({ params: { searchActor } })
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [searchActor])
 
   return (
     <>
@@ -229,7 +235,7 @@ export default function Home() {
                       type="search"
                       id="default-search"
                       value={searchActor}
-                      onChange={(e) => handleSearch(e.target.value)}
+                      onChange={(e) => setsearchActor(e.target.value)}
                       className="block w-full rounded-lg border border-gray-300 p-2 ps-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                       placeholder="Search Actor by name"
                     />
@@ -239,7 +245,11 @@ export default function Home() {
             </div>
             <div style={{ ...styles.leftBox, ...styles.scrollable }}>
               {actors && !loadingActors && (
-                <Table dense={true} className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]">
+                <Table
+                  dense={true}
+                  bleed={true}
+                  className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]"
+                >
                   <TableHead>
                     <TableRow>
                       <TableHeader>Actors</TableHeader>
@@ -286,12 +296,12 @@ export default function Home() {
         </div>
         {/* Processed Runs */}
         <div style={{ ...styles.box }}>
-          <h2 className="mb-4">Processed Runs</h2>
+          <h2 className="relative mb-4 flex">Processed Runs</h2>
 
           {!loadingRuns && (
             <div>
               <div style={{ ...styles.rightBox, ...styles.scrollable }}>
-                <ol className="relative ml-2 mr-8 mt-2 border-s border-gray-200 dark:border-gray-700">
+                <ol className="relative ml-2 mr-8 mt-8 border-s border-gray-200 dark:border-gray-700">
                   {runs.map((run: any) => (
                     <TimelineItem
                       title={run.name}
@@ -313,7 +323,7 @@ export default function Home() {
                   <button
                     onClick={showRuns}
                     type="button"
-                    className="mb-2 me-2 rounded-lg px-8 py-2.5 text-xs font-medium text-gray-300 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                    className="mb-2 me-2 rounded-lg bg-gray-300 px-8 py-2.5 text-xs font-medium text-gray-500 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
                   >
                     Show previous day
                   </button>
@@ -343,19 +353,21 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/* Locales */}
-      <div style={styles.box}>
-        <div className="mb-6">Locales</div>
+      <div>
+        {/* Locales */}
+        <div style={styles.box}>
+          <div className="mb-6">Locales</div>
 
-        {loadingLocales ? (
-          <SkeletonList></SkeletonList>
-        ) : (
-          Object.entries(locales).map(([key, value], index) => (
-            <div key={index}>
-              <StackedList data={[key, value]}></StackedList>
-            </div>
-          ))
-        )}
+          {loadingLocales ? (
+            <SkeletonList></SkeletonList>
+          ) : (
+            Object.entries(locales).map(([key, value], index) => (
+              <div key={index}>
+                <StackedList data={[key, value]}></StackedList>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </>
   )

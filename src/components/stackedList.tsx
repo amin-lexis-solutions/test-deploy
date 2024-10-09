@@ -1,3 +1,4 @@
+import { formatNumberWithDots } from '@/utils/helpers'
 import { useEffect, useState } from 'react'
 import { BadgeComponent } from './badgeComponent'
 
@@ -31,14 +32,18 @@ export function StackedList({ data }: { data: any }) {
               <p className="mt-1 truncate text-sm leading-5 text-gray-500">{data[1].domains.length} Domains</p>
             </div>
             <div style={{ minWidth: '12ch' }} className="min-w-0 flex-auto">
-              <p className="mt-1 truncate text-sm leading-5 text-gray-500">{data[1].targetPagesCount} Target pages</p>
+              <p className="mt-1 truncate text-sm leading-5 text-gray-500">
+                {formatNumberWithDots(data[1].targetPagesCount)} Target pages
+              </p>
             </div>
             <div style={{ minWidth: '8ch' }} className="min-w-0 flex-auto">
-              <p className="mt-1 truncate text-sm leading-5 text-gray-500">{data[1].itemsCount} Items</p>
+              <p className="mt-1 truncate text-sm leading-5 text-gray-500">
+                {formatNumberWithDots(data[1].itemsCount)} Items
+              </p>
             </div>
             <div className="min-w-0 flex-auto">
               <p className="mt-1 truncate text-sm leading-5 text-gray-500">
-                {data[1].itemsSeenLast24h} {'Items seen last 24h'}
+                {formatNumberWithDots(data[1].itemsSeenLast24h)} {'Items seen last 24h'}
               </p>
             </div>
           </div>
@@ -101,11 +106,13 @@ export function StackedList({ data }: { data: any }) {
                       <BadgeComponent status={domain.reliability}></BadgeComponent>
                     </div>
                     <div style={{ minWidth: '8ch' }} className="flex min-w-0 items-center">
-                      <p className="mt-1 truncate text-xs leading-5 text-gray-500">{domain.itemsCount} Items</p>
+                      <p className="mt-1 truncate text-xs leading-5 text-gray-500">
+                        {formatNumberWithDots(domain.itemsCount)} Items
+                      </p>
                     </div>
                     <div className="flex min-w-0 items-center">
                       <p className="mt-1 truncate text-xs leading-5 text-gray-500">
-                        {domain.itemsSeenLast24h} {'Items seen last 24h'}
+                        {formatNumberWithDots(domain.itemsSeenLast24h)} {'Items seen last 24h'}
                       </p>
                     </div>
                     <div className="flex min-w-0 items-center">

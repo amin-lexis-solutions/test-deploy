@@ -1,3 +1,6 @@
+import { CheckCircleIcon } from '@heroicons/react/16/solid'
+import Tooltip from './tooltip'
+
 export function TimelineItem({
   title,
   status,
@@ -33,20 +36,25 @@ export function TimelineItem({
   }
 
   return (
-    <div>
+    <div className="relative">
       <li className="mb-6 ms-4">
         <div className="absolute -start-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-200 dark:border-gray-900 dark:bg-gray-700"></div>
 
         <div className="flex items-center justify-between rounded-lg px-2 shadow-sm">
           <time className="mb-1 text-xs font-normal text-zinc-500 sm:order-last sm:mb-0">{timeAgo(date)}</time>
-          <div className="justify-center text-sm font-bold text-gray-500 dark:text-gray-300">
-            <span>
-              {title}
-              {'  '}
-            </span>
-            <span className="ml-10 rounded bg-gray-300 px-2 py-1 text-xs font-normal text-gray-800 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-              {status}
-            </span>
+          <div className="flex items-center justify-between space-x-2 text-sm font-bold text-gray-500 dark:text-gray-300">
+            <div>
+              <Tooltip text={status}>
+                {status ? (
+                  <CheckCircleIcon height={18} color="#387407" className="ph-thin ph-check-circle"></CheckCircleIcon>
+                ) : (
+                  <></>
+                )}
+              </Tooltip>
+            </div>
+            <div>
+              <span>{title}</span>
+            </div>
           </div>
         </div>
         <div>

@@ -23,8 +23,8 @@ export function Table({
 }: { bleed?: boolean; dense?: boolean; grid?: boolean; striped?: boolean } & React.ComponentPropsWithoutRef<'div'>) {
   return (
     <TableContext.Provider value={{ bleed, dense, grid, striped } as React.ContextType<typeof TableContext>}>
-      <div className="flow-root">
-        <div {...props} className={clsx(className, '-mx-[--gutter] overflow-x-auto whitespace-nowrap')}>
+      <div>
+        <div {...props} className={clsx(className, 'whitespace-nowrap')}>
           <div className={clsx('inline-block min-w-full align-middle', !bleed && 'sm:px-[--gutter]')}>
             <table className="min-w-full text-left text-sm/6 text-zinc-950 dark:text-white">{children}</table>
           </div>
@@ -35,7 +35,12 @@ export function Table({
 }
 
 export function TableHead({ className, ...props }: React.ComponentPropsWithoutRef<'thead'>) {
-  return <thead {...props} className={clsx(className, 'text-zinc-500 dark:text-zinc-400')} />
+  return (
+    <thead
+      {...props}
+      className={clsx(className, 'sticky top-0 z-10 bg-gray-300 text-zinc-800 dark:bg-gray-800 dark:text-zinc-400')}
+    />
+  )
 }
 
 export function TableBody(props: React.ComponentPropsWithoutRef<'tbody'>) {
