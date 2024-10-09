@@ -166,7 +166,7 @@ export default function Home() {
 
   const handleStatus = async (query: string) => {
     setStatusFilter(query)
-    await getActors({ params: { statusFilter: query } })
+    await getActors({ params: { statusFilter: query, searchActor } })
   }
 
   useEffect(() => {
@@ -180,196 +180,202 @@ export default function Home() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      getActors({ params: { searchActor } })
+      getActors({ params: { searchActor, statusFilter } })
     }, 300)
 
     return () => clearTimeout(timeout)
   }, [searchActor])
 
   return (
-    <>
-      <div style={styles.container}>
-        {/* Actors */}
-        <div style={{ ...styles.leftBox, ...styles.box }}>
-          <div>
-            <div className="mb-4">
-              <h2 className="mb-2">Actors</h2>
-              <div className="grid grid-cols-[auto_1fr] gap-4">
-                <form className="w-full">
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => handleStatus(e.target.value)}
-                    id="status"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                  >
-                    <option selected value={''}>
-                      Choose a status
-                    </option>
-                    <option value="RUNNING">Running</option>
-                    <option value="SUCCEEDED">Success</option>
-                    <option value="FAILED">Fail</option>
-                    <option value="TIMED-OUT">Time out</option>
-                  </select>
-                </form>
-                <form className="w-2/3">
-                  <label className="sr-only mb-2 text-sm font-medium text-gray-900 dark:text-white">Search</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-                      <svg
-                        className="h-4 w-4 text-gray-500 dark:text-gray-400"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      type="search"
-                      id="default-search"
-                      value={searchActor}
-                      onChange={(e) => setsearchActor(e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 p-2 ps-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                      placeholder="Search Actor by name"
-                    />
-                  </div>
-                </form>
-              </div>
-            </div>
-            <div style={{ ...styles.leftBox, ...styles.scrollable }}>
-              {actors && !loadingActors && (
-                <Table
-                  dense={true}
-                  bleed={true}
-                  className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]"
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableHeader>Actors</TableHeader>
-                      <TableHeader>Status</TableHeader>
-                      <TableHeader>Dates</TableHeader>
-                      <TableHeader>Processed Runs</TableHeader>
-                      <TableHeader>Last Tests</TableHeader>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {actors.length > 0 ? (
-                      actors?.map((actor: any) => (
-                        <TableRow key={actor.id} title={`Actor #${actor.id}`}>
-                          <TableCell>{actor.name}</TableCell>
-                          <TableCell>
-                            <BadgeComponent status={actor?.runs.status}></BadgeComponent>
-                          </TableCell>
-                          <TableCell> {actor?.lastRunAt && formatDateString(actor?.lastRunAt)} </TableCell>
-                          <TableCell>
-                            <div className="inline-block justify-around">
-                              Scraped {formatNumberWithDots(actor?.runs.resultCount) || 0} - Failed{' '}
-                              {formatNumberWithDots(actor?.runs.failedCount) || 0}
-                            </div>
-                          </TableCell>
-
-                          <TableCell>
-                            {actor?.test && formatDateString(actor?.test?.lastRunAt)}{' '}
-                            {actor?.test && <BadgeComponent status={actor?.test?.status}></BadgeComponent>}
-                            {!actor?.test && <BadgeComponent status={'N/A'}></BadgeComponent>}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <>
-                        <p className="mt-4 text-sm text-zinc-500">No records found.</p>
-                      </>
-                    )}
-                  </TableBody>
-                </Table>
-              )}
-              {loadingActors && <TableSkeleton></TableSkeleton>}
-            </div>
-          </div>
-        </div>
-        {/* Processed Runs */}
-        <div style={{ ...styles.box }}>
-          <h2 className="relative mb-4 flex">Processed Runs</h2>
-
-          {!loadingRuns && (
+    <div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="col-span-1 p-4 lg:col-span-2">
+          {/* Actors */}
+          <div style={{ ...styles.leftBox, ...styles.box }}>
             <div>
-              <div style={{ ...styles.rightBox, ...styles.scrollable }}>
-                <ol className="relative ml-2 mr-8 mt-8 border-s border-gray-200 dark:border-gray-700">
-                  {runs.map((run: any) => (
-                    <TimelineItem
-                      title={run.name}
-                      date={run?._max?.startedAt}
-                      status={run?._max?.status}
-                      data={run?._sum}
-                    ></TimelineItem>
-                  ))}
-                </ol>
-                {runs.length == 0 && (
-                  <>
-                    <span className="mt-4 text-sm text-zinc-500">No runs for today.</span>
-                  </>
-                )}
-              </div>
-
-              <div className="mt-4 flex">
-                <div className="mx-auto items-center self-center">
-                  <button
-                    onClick={showRuns}
-                    type="button"
-                    className="mb-2 me-2 rounded-lg bg-gray-300 px-8 py-2.5 text-xs font-medium text-gray-500 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                  >
-                    Show previous day
-                  </button>
+              <div className="mb-4">
+                <h2 className="mb-2">Actors</h2>
+                <div className="grid grid-cols-[auto_1fr] gap-4">
+                  <form className="w-full">
+                    <select
+                      defaultValue={''}
+                      value={statusFilter}
+                      onChange={(e) => handleStatus(e.target.value)}
+                      id="status"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    >
+                      <option value={''}>Choose a status</option>
+                      <option value="RUNNING">Running</option>
+                      <option value="SUCCEEDED">Success</option>
+                      <option value="FAILED">Fail</option>
+                      <option value="TIMED-OUT">Time out</option>
+                    </select>
+                  </form>
+                  <form className="w-2/3">
+                    <label className="sr-only mb-2 text-sm font-medium text-gray-900 dark:text-white">Search</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                        <svg
+                          className="h-4 w-4 text-gray-500 dark:text-gray-400"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                          />
+                        </svg>
+                      </div>
+                      <input
+                        type="search"
+                        id="default-search"
+                        value={searchActor}
+                        onChange={(e) => setsearchActor(e.target.value)}
+                        className="block w-full rounded-lg border border-gray-300 p-2 ps-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                        placeholder="Search Actor by name"
+                      />
+                    </div>
+                  </form>
                 </div>
               </div>
-            </div>
-          )}
-          {loadingRuns && <SkeletonList></SkeletonList>}
-        </div>
+              <div style={{ ...styles.leftBox, ...styles.scrollable }}>
+                {actors && !loadingActors && (
+                  <Table
+                    dense={true}
+                    bleed={true}
+                    className="mr-4 mt-2 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.8)]"
+                  >
+                    <TableHead>
+                      <TableRow>
+                        <TableHeader>Actors</TableHeader>
+                        <TableHeader>Status</TableHeader>
+                        <TableHeader>Dates</TableHeader>
+                        <TableHeader>Processed Runs</TableHeader>
+                        <TableHeader>Last Tests</TableHeader>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {actors.length > 0 ? (
+                        actors?.map((actor: any) => (
+                          <TableRow key={actor.id} title={`Actor #${actor.id}`}>
+                            <TableCell>{actor.name}</TableCell>
+                            <TableCell>
+                              <BadgeComponent status={actor?.runs.status}></BadgeComponent>
+                            </TableCell>
+                            <TableCell> {actor?.lastRunAt && formatDateString(actor?.lastRunAt)} </TableCell>
+                            <TableCell>
+                              <div className="inline-block justify-around">
+                                Scraped {formatNumberWithDots(actor?.runs.resultCount) || 0} - Failed{' '}
+                                {formatNumberWithDots(actor?.runs.failedCount) || 0}
+                              </div>
+                            </TableCell>
 
-        {/* Right Section (1/3 of the screen) */}
-        <div style={{ ...styles.box, ...styles.rightBox }}>
-          <div>
-            <h2 className="mb-4">Items & Target Pages stats</h2>
-            {loadingChart ? (
-              <ImageSkeleton></ImageSkeleton>
-            ) : (
-              <MultiAxisLineChart data={{ items, targets }}></MultiAxisLineChart>
-            )}
-          </div>
-        </div>
-        {/* Breakdowns */}
-        <div style={{ ...styles.box, ...styles.rightBox }}>
-          <div>
-            <div className="mb-6">Items breakdown</div>
-            {loadingBreakdown ? <ImageSkeleton></ImageSkeleton> : <PieChart dataset={expires}></PieChart>}
-          </div>
-        </div>
-      </div>
-      <div>
-        {/* Locales */}
-        <div style={styles.box}>
-          <div className="mb-6">Locales</div>
-
-          {loadingLocales ? (
-            <SkeletonList></SkeletonList>
-          ) : (
-            Object.entries(locales).map(([key, value], index) => (
-              <div key={index}>
-                <StackedList data={[key, value]}></StackedList>
+                            <TableCell>
+                              {actor?.test && formatDateString(actor?.test?.lastRunAt)}{' '}
+                              {actor?.test && <BadgeComponent status={actor?.test?.status}></BadgeComponent>}
+                              {!actor?.test && <BadgeComponent status={'N/A'}></BadgeComponent>}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <>
+                          <div className="mt-4 text-sm text-zinc-500">No records found.</div>
+                        </>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
+                {loadingActors && <TableSkeleton></TableSkeleton>}
               </div>
-            ))
-          )}
+            </div>
+          </div>
+
+          <div className="lg:mt-6" style={{ ...styles.box, ...styles.rightBox }}>
+            <div>
+              <h2 className="mb-4">Items & Target Pages stats</h2>
+              {loadingChart ? (
+                <ImageSkeleton></ImageSkeleton>
+              ) : (
+                <MultiAxisLineChart data={{ items, targets }}></MultiAxisLineChart>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="col-span-1 p-4 lg:col-span-1">
+          {/* Right Section (1/3 of the screen) */}
+          {/* Processed Runs */}
+          <div style={{ ...styles.box }}>
+            <h2 className="relative mb-4 flex">Processed Runs</h2>
+
+            {!loadingRuns && (
+              <div>
+                <div style={{ ...styles.rightBox, ...styles.scrollable }}>
+                  <ol className="relative ml-2 mr-8 mt-8 border-s border-gray-200 dark:border-gray-700">
+                    {runs.map((run: any, index: number) => (
+                      <TimelineItem
+                        key={index}
+                        title={run.name}
+                        date={run?._max?.startedAt}
+                        status={run?._max?.status}
+                        data={run?._sum}
+                      ></TimelineItem>
+                    ))}
+                  </ol>
+                  {runs.length == 0 && (
+                    <>
+                      <span className="mt-4 text-sm text-zinc-500">No runs for today.</span>
+                    </>
+                  )}
+                </div>
+
+                <div className="mt-4 flex">
+                  <div className="mx-auto items-center self-center">
+                    <button
+                      onClick={showRuns}
+                      type="button"
+                      className="mb-2 me-2 rounded-lg bg-gray-300 px-8 py-2.5 text-xs font-medium text-gray-500 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                    >
+                      Show previous day
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {loadingRuns && <SkeletonList></SkeletonList>}
+          </div>
+          {/* Breakdowns */}
+          <div className="lg:mt-6" style={{ ...styles.box, ...styles.rightBox }}>
+            <div>
+              <div className="mb-6">Items breakdown</div>
+              {loadingBreakdown ? <ImageSkeleton></ImageSkeleton> : <PieChart dataset={expires}></PieChart>}
+            </div>
+          </div>
+        </div>
+        <div className="col-span-full">
+          <div style={{ ...styles.box }}>
+            {/* Locales */}
+            <div>
+              <div className="mb-6">Locales</div>
+
+              {loadingLocales ? (
+                <SkeletonList></SkeletonList>
+              ) : (
+                Object.entries(locales).map(([key, value], index) => (
+                  <div key={index}>
+                    <StackedList data={[key, value]}></StackedList>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -382,7 +388,7 @@ const styles = {
     height: 'auto',
   },
   box: {
-    padding: '10px',
+    padding: '20px',
     display: 'block',
     alignItems: 'center',
     justifyContent: 'center',
@@ -390,8 +396,8 @@ const styles = {
   },
   scrollable: {
     height: '500px',
-    'overflow-y': 'auto',
-    'overflow-x': 'hidden',
+    overflowY: 'auto',
+    overflowX: 'hidden',
   },
   leftBox: {
     gridRow: 'span 1',

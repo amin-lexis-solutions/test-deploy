@@ -1,3 +1,4 @@
+import { formatNumberWithDots } from '@/utils/helpers'
 import { CheckCircleIcon } from '@heroicons/react/16/solid'
 import Tooltip from './tooltip'
 
@@ -60,9 +61,9 @@ export function TimelineItem({
         <div>
           {data && status == 'SUCCEEDED' && (
             <div className="row mt-4 flex justify-start space-x-4 rounded-lg border border-gray-500 bg-gray-50 px-2 py-2 text-xs font-normal text-gray-500 dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-              <p>Created {data.createdCount}</p>
-              <p>Updated {data.updatedCount}</p>
-              <p>Archived {data.archivedCount ? data.archivedCount : 0}</p>
+              <p>Created {formatNumberWithDots(data.createdCount)}</p>
+              <p>Updated {formatNumberWithDots(data.updatedCount)}</p>
+              <p>Archived {data.archivedCount ? formatNumberWithDots(data.archivedCount) : 0}</p>
             </div>
           )}
         </div>

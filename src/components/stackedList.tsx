@@ -60,9 +60,9 @@ export function StackedList({ data }: { data: any }) {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M13 7 7.674 1.3a.91.91 0 0 0-1.348 0L1 7"
                   />
                 </svg>
@@ -77,9 +77,9 @@ export function StackedList({ data }: { data: any }) {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="m1 1 5.326 5.7a.909.909 0 0 0 1.348 0L13 1"
                   />
                 </svg>
