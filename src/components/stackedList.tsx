@@ -94,7 +94,7 @@ export function StackedList({ data }: { data: any }) {
           <ul role="list" className="mb-4">
             {selectedDomain?.domains.map((domain: any) => {
               return (
-                <li className="mx-6 flex justify-between gap-x-2 border-b border-zinc-800 px-4 py-2">
+                <li className="mx-6 flex justify-between gap-x-2 border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
                   <div className="flex min-w-0 items-center gap-x-4">
                     <h1 style={{ minWidth: '24ch' }} className="items-center text-xs font-semibold">
                       {domain.domain}

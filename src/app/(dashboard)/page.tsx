@@ -243,7 +243,7 @@ export default function Home() {
                   </form>
                 </div>
               </div>
-              <div style={{ ...styles.leftBox, ...styles.scrollable }}>
+              <div style={{ ...styles.leftBox, ...styles.scrollable }} className="overflow-y-auto overflow-x-hidden">
                 {actors && !loadingActors && (
                   <Table
                     dense={true}
@@ -314,7 +314,7 @@ export default function Home() {
 
             {!loadingRuns && (
               <div>
-                <div style={{ ...styles.rightBox, ...styles.scrollable }}>
+                <div style={{ ...styles.rightBox, ...styles.scrollable }} className="overflow-y-auto overflow-x-hidden">
                   <ol className="relative ml-2 mr-8 mt-8 border-s border-gray-200 dark:border-gray-700">
                     {runs.map((run: any, index: number) => (
                       <TimelineItem
@@ -396,8 +396,6 @@ const styles = {
   },
   scrollable: {
     height: '500px',
-    overflowY: 'auto',
-    overflowX: 'hidden',
   },
   leftBox: {
     gridRow: 'span 1',
