@@ -41,12 +41,13 @@ USER nextjs
 EXPOSE 3000
 
 # Set environment variables
+# Use ENV instead of EXPOSE for environment variables
+ENV API_URL=$API_URL
+ENV API_SECRET=$API_SECRET
+ENV ADMIN_PASS=$ADMIN_PASS
 
+# Copy .env file if it exists
 COPY .env .env
-
-EXPOSE $API_URL
-EXPOSE $API_SECRET
-EXPOSE $ADMIN_PASS
 
 # Run the Next.js app
 CMD ["npm", "start"]

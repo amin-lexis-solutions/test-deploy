@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server'
 
 export async function GET(request: any) {
-  const response = await fetch(`${process.env.API_URL}/dashboard/items`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.API_SECRET}`,
-    },
-  })
+  try {
+    const response = await fetch(`${process.env.API_URL}/dashboard/items`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.API_SECRET}`,
+      },
+    })
 
-  const data = await response.json()
+    const data = await response.json()
 
-  return NextResponse.json(data)
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error:', error)
+    return NextResponse.json({ error: 'Error fetching data' }, { status: 500 })
+  }
 }
