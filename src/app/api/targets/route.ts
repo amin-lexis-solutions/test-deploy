@@ -1,22 +1,39 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: any) {
+const API_URL = process.env.API_URL
+const API_SECRET = process.env.API_SECRET
+
+if (!API_URL || !API_SECRET) {
+  throw new Error('Missing required environment variables')
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${process.env.API_URL}/dashboard/targets`, {
+    const response = await fetch(`${API_URL}/dashboard/targets`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.API_SECRET}`,
+        Authorization: `Bearer ${API_SECRET}`,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         Pragma: 'no-cache',
         Expires: '0',
       },
     })
 
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`)
+    }
+
     const data = await response.json()
 
-    return NextResponse.json(data)
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    })
   } catch (error) {
-    console.error('Error:', error)
-    return NextResponse.json({ error: 'Error fetching data' }, { status: 500 })
+    console.error('Error fetching targets:', error)
+    return NextResponse.json({ error: 'Error fetching targets' }, { status: 500 })
   }
 }
