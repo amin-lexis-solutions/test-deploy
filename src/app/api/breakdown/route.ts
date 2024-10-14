@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 
 export async function GET(request: any) {
-
   try {
     const response = await fetch(`${process.env.API_URL}/dashboard/items-breakdown`, {
       headers: {
@@ -10,9 +9,9 @@ export async function GET(request: any) {
       },
     })
     const data = await response.json()
-      return NextResponse.json(data)
+    return NextResponse.json(data)
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error:', error)
     return NextResponse.json({ error: 'Error fetching data' }, { status: 500 })
-    }
+  }
 }
