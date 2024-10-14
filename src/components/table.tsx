@@ -23,11 +23,9 @@ export function Table({
 }: { bleed?: boolean; dense?: boolean; grid?: boolean; striped?: boolean } & React.ComponentPropsWithoutRef<'div'>) {
   return (
     <TableContext.Provider value={{ bleed, dense, grid, striped } as React.ContextType<typeof TableContext>}>
-      <div>
-        <div {...props} className={clsx(className, 'whitespace-nowrap')}>
-          <div className={clsx('inline-block min-w-full align-middle', !bleed && 'sm:px-[--gutter]')}>
-            <table className="min-w-full text-left text-sm/6 text-zinc-950 dark:text-white">{children}</table>
-          </div>
+      <div className="overflow-x-auto">
+        <div {...props} className={clsx(className, 'inline-block min-w-full align-middle')}>
+          <table className="min-w-full text-left text-sm/6 text-zinc-950 dark:text-white">{children}</table>
         </div>
       </div>
     </TableContext.Provider>
@@ -38,7 +36,11 @@ export function TableHead({ className, ...props }: React.ComponentPropsWithoutRe
   return (
     <thead
       {...props}
-      className={clsx(className, 'sticky top-0 z-10 bg-gray-300 text-zinc-800 dark:bg-gray-800 dark:text-zinc-400')}
+      className={clsx(
+        className,
+        'bg-gray-300 text-zinc-800 dark:bg-gray-800 dark:text-zinc-400',
+        'sm:sticky sm:top-0 sm:z-10'
+      )}
     />
   )
 }
@@ -87,9 +89,10 @@ export function TableHeader({ className, ...props }: React.ComponentPropsWithout
       {...props}
       className={clsx(
         className,
-        'border-b border-b-zinc-950/10 px-4 py-2 font-medium first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] dark:border-b-white/10',
+        'border-b border-b-zinc-950/10 px-4 py-2 font-medium dark:border-b-white/10',
+        'first:pl-2 last:pr-2 sm:first:pl-4 sm:last:pr-4',
         grid && 'border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5',
-        !bleed && 'sm:first:pl-1 sm:last:pr-1'
+        !bleed && 'sm:first:pl-2 sm:last:pr-2'
       )}
     />
   )
@@ -106,11 +109,11 @@ export function TableCell({ className, children, ...props }: React.ComponentProp
       {...props}
       className={clsx(
         className,
-        'relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))]',
+        'relative px-4 first:pl-2 last:pr-2 sm:first:pl-4 sm:last:pr-4',
         !striped && 'border-b border-zinc-950/5 dark:border-white/5',
         grid && 'border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5',
         dense ? 'py-2.5' : 'py-4',
-        !bleed && 'sm:first:pl-1 sm:last:pr-1'
+        !bleed && 'sm:first:pl-2 sm:last:pr-2'
       )}
     >
       {href && (

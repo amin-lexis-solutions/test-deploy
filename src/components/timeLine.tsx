@@ -42,7 +42,6 @@ export function TimelineItem({
         <div className="absolute -start-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-200 dark:border-gray-900 dark:bg-gray-700"></div>
 
         <div className="flex items-center justify-between rounded-lg px-2 shadow-sm">
-          <time className="mb-1 text-xs font-normal text-zinc-500 sm:order-last sm:mb-0">{timeAgo(date)}</time>
           <div className="flex items-center justify-between space-x-2 text-sm font-bold text-gray-500 dark:text-gray-300">
             <div>
               <Tooltip text={status}>
@@ -57,6 +56,9 @@ export function TimelineItem({
               <span>{title}</span>
             </div>
           </div>
+          <time className="mb-1 text-nowrap text-xs font-normal text-zinc-500 sm:order-last sm:mb-0">
+            {timeAgo(date)}
+          </time>
         </div>
         <div>
           {data && status == 'SUCCEEDED' && (

@@ -30,3 +30,44 @@
   scrollbar-width: thin; /* Thin width for all scrollbars */
   scrollbar-color: #555 #1e1e1e;
 }
+
+.dashboard-box {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3rem;
+  /*xl:breakpoint-1400 grid grid-cols-1 gap-12 xl:max-w-none xl:grid-cols-3*/
+}
+
+.list-text-1 {
+  font-size: 'medium';
+  font-weight: 400;
+}
+
+.list-child-text {
+  min-width: 24ch;
+}
+
+.badge-text {
+  min-width: 8ch;
+  justify-content: center;
+}
+
+@media (width <= 1400px) {
+  .dashboard-box {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 3.5rem;
+    column-gap: 0; /* 0px horizontal gap */
+
+    /*xl:breakpoint-1400 grid grid-cols-1 gap-12 xl:max-w-none xl:grid-cols-3*/
+  }
+  .list-text-1 {
+    font-size: medium;
+  }
+  .badge-text {
+    min-width: auto;
+  }
+  .list-child-text {
+    min-width: 22ch;
+  }
+}

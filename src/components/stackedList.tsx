@@ -18,113 +18,83 @@ export function StackedList({ data }: { data: any }) {
   useEffect(() => {}, [selectedDomain])
 
   return (
-    <>
+    <div className="w-full overflow-x-auto">
       <ul role="list" className="divide-y divide-gray-100">
-        <li className="flex items-center justify-between gap-x-6 px-4 py-2">
-          <div className="flex min-w-0 items-center gap-x-4">
-            <h3 style={{ minWidth: '6ch' }} className="items-center font-bold">
-              {data[0]}
-            </h3>
-            <div className="flex min-w-0 flex-auto items-center">
-              <BadgeComponent status={data[1].enabled ? 'enabled' : 'disabled'}></BadgeComponent>
+        <li className="flex flex-col items-start justify-between gap-y-2 border-b border-zinc-200 px-2 py-3 sm:flex-row sm:items-center sm:gap-x-4 dark:border-white/5">
+          <div className="flex w-full min-w-0 flex-col items-start gap-y-2 sm:flex-row sm:items-center sm:gap-x-4">
+            <div className="w-full sm:w-20">
+              <h3 className="list-text-1 truncate font-bold">{data[0]}</h3>
             </div>
-            <div style={{ minWidth: '7ch' }} className="min-w-0 flex-auto">
-              <p className="mt-1 truncate text-sm leading-5 text-gray-500">{data[1].domains.length} Domains</p>
+            <div className="flex w-full items-center gap-x-2 sm:w-auto">
+              <BadgeComponent status={data[1].enabled ? 'enabled' : 'disabled'} />
+              <p className="text-sm leading-5 text-gray-500">{data[1].domains.length} Domains</p>
             </div>
-            <div style={{ minWidth: '12ch' }} className="min-w-0 flex-auto">
-              <p className="mt-1 truncate text-sm leading-5 text-gray-500">
+            <div className="flex w-full items-center gap-x-4 sm:w-auto">
+              <p className="text-sm leading-5 text-gray-500">
                 {formatNumberWithDots(data[1].targetPagesCount)} Target pages
               </p>
-            </div>
-            <div style={{ minWidth: '8ch' }} className="min-w-0 flex-auto">
-              <p className="mt-1 truncate text-sm leading-5 text-gray-500">
-                {formatNumberWithDots(data[1].itemsCount)} Items
-              </p>
-            </div>
-            <div className="min-w-0 flex-auto">
-              <p className="mt-1 truncate text-sm leading-5 text-gray-500">
-                {formatNumberWithDots(data[1].itemsSeenLast24h)} {'Items seen last 24h'}
+              <p className="text-sm leading-5 text-gray-500">{formatNumberWithDots(data[1].itemsCount)} Items</p>
+              <p className="text-sm leading-5 text-gray-500">
+                {formatNumberWithDots(data[1].itemsSeenLast24h)} Items seen last 24h
               </p>
             </div>
           </div>
-          <div className="hidden shrink-0 sm:flex sm:items-center">
-            <div className="ml-4">
-              {selectedDomain?.visible ? (
-                <svg
-                  onClick={() => handleSelectDomain(data[1])}
-                  className="h-4 w-4 text-gray-500 dark:text-gray-500"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 14 8"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 7 7.674 1.3a.91.91 0 0 0-1.348 0L1 7"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  onClick={() => handleSelectDomain(data[1])}
-                  className="h-4 w-4 text-gray-500 dark:text-gray-500"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 14 8"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 5.326 5.7a.909.909 0 0 0 1.348 0L13 1"
-                  />
-                </svg>
-              )}
-            </div>
+          <div className="shrink-0 self-end sm:self-center">
+            <button onClick={() => handleSelectDomain(data[1])} className="p-1">
+              <svg
+                className="h-4 w-4 transform text-gray-500 transition-transform duration-200 ease-in-out dark:text-gray-500"
+                style={{ transform: selectedDomain?.visible ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 14 8"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 1 5.326 5.7a.909.909 0 0 0 1.348 0L13 1"
+                />
+              </svg>
+            </button>
           </div>
         </li>
       </ul>
 
-      <div>
-        {selectedDomain?.visible && (
-          <ul role="list" className="mb-4">
-            {selectedDomain?.domains.map((domain: any) => {
-              return (
-                <li className="mx-6 flex justify-between gap-x-2 border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
-                  <div className="flex min-w-0 items-center gap-x-4">
-                    <h1 style={{ minWidth: '24ch' }} className="items-center text-xs font-semibold">
-                      {domain.domain}
-                    </h1>
-                    <div className="flex min-w-0 items-center">
-                      <BadgeComponent status={domain.status}></BadgeComponent>
-                    </div>
-                    <div className="flex min-w-0 items-center">
-                      <BadgeComponent status={domain.reliability}></BadgeComponent>
-                    </div>
-                    <div style={{ minWidth: '8ch' }} className="flex min-w-0 items-center">
-                      <p className="mt-1 truncate text-xs leading-5 text-gray-500">
-                        {formatNumberWithDots(domain.itemsCount)} Items
-                      </p>
-                    </div>
-                    <div className="flex min-w-0 items-center">
-                      <p className="mt-1 truncate text-xs leading-5 text-gray-500">
-                        {formatNumberWithDots(domain.itemsSeenLast24h)} {'Items seen last 24h'}
-                      </p>
-                    </div>
-                    <div className="flex min-w-0 items-center">
-                      {domain.proxy && <BadgeComponent status={`${domain.proxy} proxy`}></BadgeComponent>}
-                    </div>
+      {selectedDomain?.visible && (
+        <ul className="px-2 py-2 sm:px-6" role="list">
+          {selectedDomain?.domains.map((domain: any, index: number) => (
+            <li
+              key={index}
+              className="flex flex-col items-start justify-between gap-y-2 border-b border-zinc-200 py-3 sm:flex-row sm:items-center sm:gap-x-4 dark:border-white/5"
+            >
+              <div className="flex w-full min-w-0 flex-col items-start gap-y-2 sm:flex-row sm:items-center sm:gap-x-4">
+                <h1 className="list-child-text truncate text-sm leading-5 text-gray-500 dark:font-semibold">
+                  {domain.domain}
+                </h1>
+                <div className="flex items-center gap-x-2">
+                  <BadgeComponent status={domain.status} />
+                  <BadgeComponent status={domain.reliability} />
+                </div>
+                <div className="flex items-center gap-x-4">
+                  <p className="list-text-sm truncate text-xs leading-5 text-gray-500">
+                    {formatNumberWithDots(domain.itemsCount)} items
+                  </p>
+                  <p className="block truncate text-xs leading-5 text-gray-500">
+                    {formatNumberWithDots(domain.itemsSeenLast24h)} Items seen last 24h
+                  </p>
+                </div>
+                {domain.proxy && (
+                  <div className="flex items-center sm:mt-0">
+                    <BadgeComponent status={`${domain.proxy} proxy`} />
                   </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </div>
-    </>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }

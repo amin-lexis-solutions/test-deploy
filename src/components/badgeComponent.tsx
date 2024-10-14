@@ -1,34 +1,32 @@
-export function BadgeComponent({ status }: { status?: string }) {
-  const green =
-    'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-green-500 ring-1 ring-inset ring-green-600/20'
+import { useMemo } from 'react'
 
-  const red =
-    'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-red-500 ring-1 ring-inset ring-red-600/10'
+type BadgeProps = {
+  status?: string
+}
 
-  const gray =
-    'inline-flex items-center rounded-md px-8 py-1 text-xs font-medium text-gray-300 dark:text-gray-500 ring-1 ring-inset ring-gray-500'
+export function BadgeComponent({ status }: BadgeProps) {
+  const baseClasses = 'badge-text inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset'
 
-  const purple =
-    'bg-purple-100 text-purple-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300'
-
-  const statusClass: any = {
-    SUCCEEDED: green,
-    FAILED: red,
-    'TIMED-OUT':
-      'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-yellow-500 ring-1 ring-inset ring-yellow-600/20',
-    reliable: green,
-    active: green,
-    enabled: green,
-    disabled: red,
-  }
-
-  const dynamicClass = (className?: string) => {
-    return className?.includes('proxy') ? purple : statusClass[className || ''] || gray
-  }
-
-  return (
-    <>
-      <span className={dynamicClass(status)}>{status ? status : 'N/A'}</span>
-    </>
+  const statusClasses: any = useMemo(
+    () => ({
+      SUCCEEDED: 'text-green-700 bg-green-50 ring-green-600/20',
+      FAILED: 'text-red-700 bg-red-50 ring-red-600/10',
+      'TIMED-OUT': 'text-yellow-800 bg-yellow-50 ring-yellow-600/20',
+      reliable: 'text-green-700 bg-green-50 ring-green-600/20',
+      active: 'text-green-700 bg-green-50 ring-green-600/20',
+      enabled: 'text-green-700 bg-green-50 ring-green-600/20',
+      disabled: 'text-red-700 bg-red-50 ring-red-600/10',
+      proxy: 'text-purple-700 bg-purple-50 ring-purple-600/20',
+      default: 'text-gray-600 bg-gray-50 ring-gray-500/10',
+    }),
+    []
   )
+
+  const getBadgeClass = (status?: string) => {
+    if (!status) return `${baseClasses} ${statusClasses.default}`
+    if (status.toLowerCase().includes('proxy')) return `${baseClasses} ${statusClasses.proxy}`
+    return `${baseClasses} ${statusClasses[status] || statusClasses.default}`
+  }
+
+  return <span className={getBadgeClass(status)}>{status || 'N/A'}</span>
 }

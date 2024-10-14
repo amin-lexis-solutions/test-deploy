@@ -10,14 +10,16 @@ import {
   Title,
   Tooltip,
 } from 'chart.js'
+import { useEffect, useState } from 'react'
 import { Line } from 'react-chartjs-2'
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 // Configuration options for the chart
-const options = {
+const getOptions = (isMobile: boolean) => ({
   responsive: true,
+  maintainAspectRatio: false,
   interaction: {
     mode: 'index' as const,
     intersect: false,
@@ -27,35 +29,73 @@ const options = {
     title: {
       display: true,
       text: 'Daily scraping stats',
+      font: {
+        size: isMobile ? 14 : 16,
+      },
+    },
+    legend: {
+      labels: {
+        font: {
+          size: isMobile ? 10 : 12,
+        },
+      },
     },
   },
   scales: {
+    x: {
+      ticks: {
+        font: {
+          size: isMobile ? 8 : 10,
+        },
+      },
+    },
     y1: {
       type: 'linear' as const,
       display: true,
       position: 'left' as const,
+      ticks: {
+        font: {
+          size: isMobile ? 8 : 10,
+        },
+      },
     },
     y2: {
       type: 'linear' as const,
       display: true,
       position: 'right' as const,
       grid: {
-        drawOnChartArea: false, // This disables the grid for the secondary y-axis
+        drawOnChartArea: false,
+      },
+      ticks: {
+        font: {
+          size: isMobile ? 8 : 10,
+        },
       },
     },
   },
-}
+})
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
-
-  const day = date.getUTCDate() // Get the day (1-31)
-  const month = date.toLocaleString('en-US', { month: 'short' }) // Get the month in short format (e.g., 'Jun')
-
-  return `${day} ${month}` // Return formatted date as '31 Jun'
+  const day = date.getUTCDate()
+  const month = date.toLocaleString('en-US', { month: 'short' })
+  return `${day} ${month}`
 }
 
 const MultiAxisLineChart = ({ data }: { data: any }) => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768) // Adjust this breakpoint as needed
+    }
+
+    checkIfMobile()
+    window.addEventListener('resize', checkIfMobile)
+
+    return () => window.removeEventListener('resize', checkIfMobile)
+  }, [])
+
   const schema = {
     labels:
       data?.items?.dates > data?.targets?.dates
@@ -78,7 +118,12 @@ const MultiAxisLineChart = ({ data }: { data: any }) => {
       },
     ],
   }
-  return <Line data={schema} options={options} />
+
+  return (
+    <div style={{ height: isMobile ? '300px' : '400px' }}>
+      <Line data={schema} options={getOptions(isMobile)} />
+    </div>
+  )
 }
 
 export default MultiAxisLineChart
