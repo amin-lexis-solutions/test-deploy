@@ -6,6 +6,9 @@ export async function GET(request: any) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.API_SECRET}`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     })
 

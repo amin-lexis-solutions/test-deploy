@@ -25,7 +25,7 @@ export function Table({
     <TableContext.Provider value={{ bleed, dense, grid, striped } as React.ContextType<typeof TableContext>}>
       <div className="overflow-x-auto">
         <div {...props} className={clsx(className, 'inline-block min-w-full align-middle')}>
-          <table className="min-w-full text-left text-sm/6 text-zinc-950 dark:text-white">{children}</table>
+          <table className="min-w-full text-left text-sm/6 text-zinc-950 dark:text-zinc-200">{children}</table>
         </div>
       </div>
     </TableContext.Provider>
@@ -38,7 +38,7 @@ export function TableHead({ className, ...props }: React.ComponentPropsWithoutRe
       {...props}
       className={clsx(
         className,
-        'bg-gray-300 text-zinc-800 dark:bg-gray-800 dark:text-zinc-400',
+        'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200',
         'sm:sticky sm:top-0 sm:z-10'
       )}
     />
@@ -46,7 +46,7 @@ export function TableHead({ className, ...props }: React.ComponentPropsWithoutRe
 }
 
 export function TableBody(props: React.ComponentPropsWithoutRef<'tbody'>) {
-  return <tbody {...props} />
+  return <tbody {...props} className="bg-white dark:bg-zinc-900" />
 }
 
 const TableRowContext = createContext<{ href?: string; target?: string; title?: string }>({
@@ -71,10 +71,10 @@ export function TableRow({
         className={clsx(
           className,
           href &&
-            'has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-blue-500 dark:focus-within:bg-white/[2.5%]',
-          striped && 'even:bg-zinc-950/[2.5%] dark:even:bg-white/[2.5%]',
-          href && striped && 'hover:bg-zinc-950/5 dark:hover:bg-white/5',
-          href && !striped && 'hover:bg-zinc-950/[2.5%] dark:hover:bg-white/[2.5%]'
+            'has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-blue-500 dark:focus-within:bg-zinc-800',
+          striped && 'even:bg-zinc-50 dark:even:bg-zinc-800/50',
+          href && striped && 'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+          href && !striped && 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
         )}
       />
     </TableRowContext.Provider>
@@ -89,9 +89,9 @@ export function TableHeader({ className, ...props }: React.ComponentPropsWithout
       {...props}
       className={clsx(
         className,
-        'border-b border-b-zinc-950/10 px-4 py-2 font-medium dark:border-b-white/10',
+        'border-b border-b-zinc-200 px-4 py-2 font-medium dark:border-b-zinc-700',
         'first:pl-2 last:pr-2 sm:first:pl-4 sm:last:pr-4',
-        grid && 'border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5',
+        grid && 'border-l border-l-zinc-200 first:border-l-0 dark:border-l-zinc-700',
         !bleed && 'sm:first:pl-2 sm:last:pr-2'
       )}
     />
@@ -110,8 +110,8 @@ export function TableCell({ className, children, ...props }: React.ComponentProp
       className={clsx(
         className,
         'relative px-4 first:pl-2 last:pr-2 sm:first:pl-4 sm:last:pr-4',
-        !striped && 'border-b border-zinc-950/5 dark:border-white/5',
-        grid && 'border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5',
+        !striped && 'border-b border-zinc-200 dark:border-zinc-700',
+        grid && 'border-l border-l-zinc-200 first:border-l-0 dark:border-l-zinc-700',
         dense ? 'py-2.5' : 'py-4',
         !bleed && 'sm:first:pl-2 sm:last:pr-2'
       )}
