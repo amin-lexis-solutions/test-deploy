@@ -4,17 +4,20 @@ FROM node:lts-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copy package.json and yarn.lock
+COPY package.json yarn.lock ./
 
-# Install dependencies
-RUN npm install
+# Clean up and install dependencies
+RUN rm -rf .next && \
+    rm -rf node_modules && \
+    yarn cache clean && \
+    yarn install --frozen-lockfile
 
 # Copy project files
 COPY . .
 
 # Build the Next.js app
-RUN npm run build
+RUN yarn build
 
 # Start a new stage for a smaller production image
 FROM node:lts-alpine
@@ -25,7 +28,9 @@ WORKDIR /app
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/yarn.lock ./yarn.lock
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
 # Add non-root user for security
 RUN addgroup -g 1001 -S nodejs
@@ -41,10 +46,8 @@ USER nextjs
 EXPOSE 3000
 
 # Set environment variables
-
-# Set environment variables
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Run the Next.js app
-CMD ["npm", "start"]
+CMD ["yarn", "start"]
