@@ -107,14 +107,21 @@ export default function Home() {
   const getBreakdown = async () => {
     setLoadingBreakdown(true)
     setTimeout(async () => {
-      const response = await fetch(`/api/breakdown`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-        },
-      })
-      const json = await response.json()
-      setExpires(json.data.results)
+      let results = [];
+
+      try {
+        const response = await fetch(`/api/breakdown`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+          },
+        })
+        const json = await response.json()
+        results = json.data.results
+      } catch (error) {
+        console.error('Error fetching breakdown:', error)
+      }
+      setExpires(results)
       setLoadingBreakdown(false)
     }, 2000)
   }
