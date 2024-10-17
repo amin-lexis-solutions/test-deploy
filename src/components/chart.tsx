@@ -97,21 +97,19 @@ const MultiAxisLineChart = ({ data }: { data: any }) => {
   }, [])
 
   const schema = {
-    labels:
-      data?.items?.dates > data?.targets?.dates
-        ? data?.items?.dates?.map((date: string) => formatDate(date))
-        : data?.targets?.dates?.map((date: string) => formatDate(date)),
+    labels: data?.dates?.map((date: string) => formatDate(date)),
+
     datasets: [
       {
         label: 'Items count',
-        data: data.items.items,
+        data: data?.items,
         borderColor: 'rgb(41,98,255)',
         backgroundColor: 'rgb(41,98,255)',
         yAxisID: 'y1',
       },
       {
         label: 'Targets count',
-        data: data.targets.targets,
+        data: data?.targets,
         borderColor: 'rgb(170,0,255)',
         backgroundColor: 'rgb(170,0,255)',
         yAxisID: 'y2',

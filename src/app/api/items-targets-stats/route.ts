@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 
-// Define a schema for input validation
-const QuerySchema = z.object({})
-
-// Helper function for consistent error responses
 function errorResponse(message: string, status: number = 500) {
   console.error(`Error: ${message}`)
   return NextResponse.json({ error: message }, { status })
@@ -19,16 +14,8 @@ export async function GET(request: NextRequest) {
       throw new Error('Missing required environment variables')
     }
 
-    // Parse and validate query parameters
-    const queryParams = Object.fromEntries(request.nextUrl.searchParams)
-    const validatedParams = QuerySchema.safeParse(queryParams)
-
-    if (!validatedParams.success) {
-      return errorResponse('Invalid query parameters', 400)
-    }
-
     // Construct URL for external API
-    const url = new URL(`${process.env.API_URL}/dashboard/items`)
+    const url = new URL(`${process.env.API_URL}/dashboard/items-targets-stats`)
 
     console.log(`Fetching from URL: ${url.toString()}`)
 
@@ -68,6 +55,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
+    console.error('Detailed error:', error)
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         return errorResponse('Request timed out', 504)

@@ -18,8 +18,8 @@ export default function Home() {
   const [actors, setActors] = useState([])
   const [runs, setRuns] = useState<any>([])
 
-  const [items, setItems] = useState([])
-  const [targets, setTargets] = useState([])
+  const [itemsAndTargets, setItemsAndTargets] = useState({ dates: [], items: [], targets: [] })
+
   const [expires, setExpires] = useState([])
   const [locales, setLocales] = useState([])
 
@@ -86,30 +86,23 @@ export default function Home() {
     }, 1000)
   }
 
-  // Async function to retrieve and set itemCount
-  const getItems = async function () {
-    const response = await fetch(`/api/items`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken,
-      },
-    })
-    const json = await response.json()
-    setItems(json.data.results)
+  const getItemsAndTargetsStats = async () => {
+    try {
+      const response = await fetch(`/api/items-targets-stats`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
+      })
+      if (!response.ok) {
+        throw new Error('Failed to fetch items and targets stats')
+      }
+      const json = await response.json()
+      setItemsAndTargets(json.data.results)
+    } catch (error) {
+      console.error('Error fetching items and targets stats:', error)
+    }
   }
-
-  // Async function to retrieve and set target pages
-  const getTargets = async () => {
-    const response = await fetch(`/api/targets`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken,
-      },
-    })
-    const json = await response.json()
-    setTargets(json.data.results)
-  }
-
   // Async function to retrieve and set items breakdowns
   const getBreakdown = async () => {
     setLoadingBreakdown(true)
@@ -155,8 +148,7 @@ export default function Home() {
   const getChartData = async () => {
     setLoadingChart(true)
     setTimeout(async () => {
-      await getItems()
-      await getTargets()
+      await getItemsAndTargetsStats()
       setLoadingChart(false)
     }, 2000)
   }
@@ -379,7 +371,7 @@ export default function Home() {
               {loadingChart ? (
                 <ImageSkeleton></ImageSkeleton>
               ) : (
-                <MultiAxisLineChart data={{ items, targets }}></MultiAxisLineChart>
+                <MultiAxisLineChart data={itemsAndTargets}></MultiAxisLineChart>
               )}
             </div>
           </div>
