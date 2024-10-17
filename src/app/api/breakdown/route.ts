@@ -7,6 +7,8 @@ if (!API_URL || !API_SECRET) {
   throw new Error('Missing required environment variables')
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const response = await fetch(`${API_URL}/dashboard/items-breakdown`, {

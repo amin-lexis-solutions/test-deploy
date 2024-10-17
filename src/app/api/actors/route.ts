@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 function validateAndSanitizeInput(value: string | null): string | null {
   if (!value) return null
   return value.replace(/[^\w\s-]/gi, '').trim()

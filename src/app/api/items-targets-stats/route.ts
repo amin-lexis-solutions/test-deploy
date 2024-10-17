@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 function errorResponse(message: string, status: number = 500) {
   console.error(`Error: ${message}`)
   return NextResponse.json({ error: message }, { status })
