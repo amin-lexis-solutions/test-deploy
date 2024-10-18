@@ -15,6 +15,9 @@ const USERS: Record<string, User> = {
 
 export async function POST(request: NextRequest) {
   const limitResult = rateLimit(request)
+
+  console.log('Received request with authToken  ', process.env) // Debug log
+
   if (!limitResult.success) {
     return NextResponse.json({ success: false, message: limitResult.message }, { status: 429 })
   }
